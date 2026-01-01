@@ -8,10 +8,13 @@ import "core:strings"
 import "core:time"
 
 main :: proc() {
-	context.logger = log.create_console_logger()
+	when ODIN_DEBUG {
+		context.logger = log.create_console_logger()
+	}
 
-	log.debug(len(os.args))
-	ensure(len(os.args) == 2, "wrong argument")
+	if len(os.args) != 2 {
+		fmt.eprintfln("Wrong number of argument")
+	}
 	path := os.args[1]
 
 	if !os.exists(path) {
