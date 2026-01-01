@@ -14,6 +14,7 @@ main :: proc() {
 
 	if len(os.args) != 2 {
 		fmt.eprintfln("Wrong number of argument")
+        os.exit(1)
 	}
 	path := os.args[1]
 
@@ -34,12 +35,15 @@ main :: proc() {
 	ensure(stat_err == nil)
 
 	line_length: u16 = 0
-	for i := file_info.size - 2; i >= 0; i -= 1 {
-		char: [1]u8
-		os.read_at(file, ([]u8)(char[:]), i)
-		if char[0] == '\n' do break
-		line_length += 1
+	{ 	// parse last line
+		for i := file_info.size - 2; i >= 0; i -= 1 {
+			char: [1]u8
+			os.read_at(file, ([]u8)(char[:]), i)
+			if char[0] == '\n' do break
+			line_length += 1
+		}
 	}
+
 	pre_line := make([dynamic]u8, line_length)
 	os.read_at(file, pre_line[:], (file_info.size - 1) - (i64)(line_length))
 	log.debug(transmute(string)(pre_line[:]))
