@@ -1,6 +1,5 @@
 package main
 
-import "core:fmt"
 import "core:log"
 import os "core:os/os2"
 import "core:strconv"
@@ -10,11 +9,14 @@ import "core:time"
 main :: proc() {
 	when ODIN_DEBUG {
 		context.logger = log.create_console_logger()
+	} else {
+		context.logger = log.create_console_logger(lowest = .Error)
 	}
 
 	if len(os.args) != 2 {
-		fmt.eprintfln("Wrong number of argument")
-        os.exit(1)
+		log.debug(os.args)
+		log.error("Wrong number of argument.")
+		os.exit(1)
 	}
 	path := os.args[1]
 
@@ -22,11 +24,14 @@ main :: proc() {
 		f, create_file_err := os.create(path)
 		os.write_string(f, "00:00:00\n")
 		os.close(f)
-		return
+		os.exit(0)
 	}
 
 	file, open_file_err := os.open(path, {.Read, .Write})
-	ensure(open_file_err == nil)
+	if open_file_err != nil {
+		log.errorf("%v", open_file_err)
+		os.exit(1)
+	}
 	defer {
 		err := os.close(file)
 		ensure(err == nil)
